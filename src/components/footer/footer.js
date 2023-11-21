@@ -1,31 +1,54 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
 import "./footer.css"
 import TasksFilter from "../tasks-filter";
 
+const filterItems = [
+    { name: 'all', label: 'All'},
+    { name: 'active', label: 'Active'},
+    { name: 'done', label: 'Completed'}
+]
 
-const Footer = ({filters}) => {
+const Footer = ({todoCount, filter, onFilterChange, onClearCompleted }) => {
+    const elements = filterItems.map(({name, label}) => {
+        const isActive = name === filter;
+        const classNames = isActive ? 'selected': ''
 
-    const elements = filters.map((item) => {
         return (
-            <li key={item.id}><TasksFilter condition={item.condition} status={item.status}/></li>
+            <li key={name}>
+                <TasksFilter 
+                    label={label}
+                    classNames={classNames}
+                    onFilterChange={() => { 
+                        onFilterChange(name); 
+                    }} 
+                />
+            </li>
         )
     })
 
-    const count = 1
-
     return (
         <footer className="footer">
-            <span className="todo-count">{count} items left</span>
+            <span className="todo-count">{todoCount} items left</span>
             <ul className="filters">
                 {elements}
             </ul>
-            <button className="clear-completed">Clear completed</button>
+            <button 
+                className="clear-completed"
+                onClick={() => { 
+                    onClearCompleted()
+                }}
+            >Clear completed</button>
         </footer>
     );
 };
 
-//const formattedCreated = format(new Date(created), "yyyy-MM-dd HH:mm:ss");
+Footer.propTypes = {
+    todoCount: PropTypes.number.isRequired,
+    filter: PropTypes.string.isRequired,
+    onFilterChange: PropTypes.func.isRequired,
+    onClearCompleted: PropTypes.func.isRequired,
+}
 
 export default Footer;
-
