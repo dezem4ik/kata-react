@@ -1,15 +1,20 @@
 import React from "react";
-import "./header.css"
+import PropTypes from "prop-types";
+
+import "./header.css";
 import NewTaskForm from "../new-task-form";
 
+const Header = ({ onAdded }) => {
+  return (
+    <header className="header">
+      <h1>todos</h1>
+      <NewTaskForm onAdded={onAdded} />
+    </header>
+  );
+};
 
-const Header = ({onAdded}) => {
-    return (
-        <header className="header">
-            <h1>todos</h1>
-            <NewTaskForm onAdded = {onAdded}/>
-        </header>
-    );
+Header.propTypes = {
+  onAdded: PropTypes.func.isRequired,
 };
 
 export default Header;
