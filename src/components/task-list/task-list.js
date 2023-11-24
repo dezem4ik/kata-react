@@ -4,25 +4,23 @@ import PropTypes from "prop-types";
 import "./task-list.css";
 import Task from "../task";
 
-const TaskList = ({ todos, onDeleted, onToggleDone, onSaveTask }) => {
-  const elements = todos.map((item) => {
-    return (
-      <li key={item.id} className={item.status === "done" ? "completed" : ""}>
-        <Task
-          id={item.id}
-          description={item.description}
-          created={item.created}
-          onDeleted={() => onDeleted(item.id)}
-          status={item.status}
-          onToggleDone={() => onToggleDone(item.id)}
-          onSaveTask={onSaveTask}
-        />
-      </li>
-    );
-  });
+function TaskList({ todos, onDeleted, onToggleDone, onSaveTask }) {
+  const elements = todos.map((item) => (
+    <li key={item.id} className={item.status === "done" ? "completed" : ""}>
+      <Task
+        id={item.id}
+        description={item.description}
+        created={item.created}
+        onDeleted={() => onDeleted(item.id)}
+        status={item.status}
+        onToggleDone={() => onToggleDone(item.id)}
+        onSaveTask={onSaveTask}
+      />
+    </li>
+  ));
 
   return <ul className="todo-list">{elements}</ul>;
-};
+}
 
 TaskList.defaultProps = {
   todos: [],

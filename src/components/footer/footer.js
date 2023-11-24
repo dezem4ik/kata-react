@@ -10,7 +10,7 @@ const filterItems = [
   { name: "done", label: "Completed" },
 ];
 
-const Footer = ({ todoCount, filter, onFilterChange, onClearCompleted }) => {
+function Footer({ todoCount, filter, onFilterChange, onClearCompleted }) {
   const elements = filterItems.map(({ name, label }) => {
     const isActive = name === filter;
     const classNames = isActive ? "selected" : "";
@@ -30,9 +30,13 @@ const Footer = ({ todoCount, filter, onFilterChange, onClearCompleted }) => {
 
   return (
     <footer className="footer">
-      <span className="todo-count">{todoCount} items left</span>
+      <span className="todo-count">
+        {todoCount}
+        items left
+      </span>
       <ul className="filters">{elements}</ul>
       <button
+        type="button"
         className="clear-completed"
         onClick={() => {
           onClearCompleted();
@@ -42,7 +46,7 @@ const Footer = ({ todoCount, filter, onFilterChange, onClearCompleted }) => {
       </button>
     </footer>
   );
-};
+}
 
 Footer.propTypes = {
   todoCount: PropTypes.number.isRequired,

@@ -4,9 +4,12 @@ import PropTypes from "prop-types";
 import "./new-task-form.css";
 
 export default class NewTaskForm extends Component {
-  state = {
-    label: "",
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      label: "",
+    };
+  }
 
   onLabelChange = (e) => {
     this.setState({
@@ -17,12 +20,14 @@ export default class NewTaskForm extends Component {
   onSubmit = (e) => {
     e.preventDefault();
     const { label } = this.state;
+    const { onAdded } = this.props;
     this.setState({ label: "" });
-    const cb = this.props.onAdded || (() => {});
+    const cb = onAdded || (() => {});
     cb(label);
   };
 
   render() {
+    const { label } = this.state;
     return (
       <form onSubmit={this.onSubmit}>
         <input
@@ -31,7 +36,7 @@ export default class NewTaskForm extends Component {
           placeholder="What needs to be done?"
           autoFocus
           onChange={this.onLabelChange}
-          value={this.state.label}
+          value={label}
         />
       </form>
     );

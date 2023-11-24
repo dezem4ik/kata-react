@@ -6,10 +6,13 @@ import { enUS } from "date-fns/locale";
 import "./task.css";
 
 export default class Task extends Component {
-  state = {
-    isEditing: false,
-    editedDescription: "",
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      isEditing: false,
+      editedDescription: "",
+    };
+  }
 
   handleEditClick = () => {
     const { description } = this.props;
@@ -76,8 +79,18 @@ export default class Task extends Component {
           type="checkbox"
           onChange={onToggleDone}
         />
-        <label>
-          <span className="description" onClick={onToggleDone}>
+        <label htmlFor="newTaskFormInput">
+          <span
+            className="description"
+            onClick={onToggleDone}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                onToggleDone();
+              }
+            }}
+            role="button"
+            tabIndex={0}
+          >
             {isEditing ? (
               <input
                 type="text"
@@ -85,24 +98,35 @@ export default class Task extends Component {
                 onChange={this.handleDescriptionChange}
                 onKeyPress={this.handleKeyPress}
                 autoFocus
+                id="newTaskFormInput"
+                aria-label="Edit task description"
               />
             ) : (
               description
             )}
           </span>
-          <span className="created ">{formattedDistance}</span>
+          <span className="created">{formattedDistance}</span>
         </label>
         <button
+          type="button"
           className={`icon icon-edit ${isEditing ? "editing" : ""}`}
           onClick={isEditing ? this.handleSaveClick : this.handleEditClick}
+          aria-label={isEditing ? "Save task" : "Edit task"}
         />
         {isEditing && (
           <button
+            type="button"
             className="icon icon-destroy"
             onClick={this.handleCancelClick}
+            aria-label="Cancel edit"
           />
         )}
-        <button className="icon icon-destroy" onClick={onDeleted} />
+        <button
+          type="button"
+          className="icon icon-destroy"
+          onClick={onDeleted}
+          aria-label="Delete task"
+        />
       </div>
     );
   }

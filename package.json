@@ -56,14 +56,23 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.3.0",
     "prettier": "^3.1.0"
-  },"husky": {
+  },
+  "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
     }
   },
   "lint-staged": {
-    "*.js": ["eslint --fix", "prettier --write"],
-    "*.css": ["stylelint --fix", "prettier --write"],
-    "public/**/*.html": ["prettier --write"]
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.css": [
+      "stylelint --fix",
+      "prettier --write"
+    ],
+    "public/**/*.html": [
+      "prettier --write"
+    ]
   }
 }

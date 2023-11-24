@@ -1,3 +1,3 @@
-import Task from "./task.js";
+import Task from "./task";
 
 export default Task;

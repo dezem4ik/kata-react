@@ -5,10 +5,36 @@ import TaskList from "../task-list";
 import Header from "../header";
 
 export default class TodoApp extends Component {
-  maxId = 100;
+  constructor(props) {
+    super(props);
+
+    this.maxId = 100;
+
+    this.state = {
+      todoData: [
+        this.createTaskItem("Completed task"),
+        this.createTaskItem("Editing task"),
+        this.createTaskItem("Active task"),
+      ],
+      filter: "all",
+    };
+
+    this.updateTimeInterval = null;
+  }
+
+  componentDidMount() {
+    this.updateTimeInterval = setInterval(() => {
+      this.updateTaskCreationTime();
+    }, 5000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.updateTimeInterval);
+  }
 
   createTaskItem = (description) => {
-    const id = ++this.maxId;
+    this.maxId += 1;
+    const id = this.maxId;
     const created = new Date();
 
     return {
@@ -17,15 +43,6 @@ export default class TodoApp extends Component {
       created,
       status: "active",
     };
-  };
-
-  state = {
-    todoData: [
-      this.createTaskItem("Completed task"),
-      this.createTaskItem("Editing task"),
-      this.createTaskItem("Active task"),
-    ],
-    filter: "all",
   };
 
   onSaveTask = (id, editedDescription) => {
@@ -37,16 +54,6 @@ export default class TodoApp extends Component {
       return { todoData: updatedTodoData };
     });
   };
-
-  componentDidMount() {
-    this.updateTimeInterval = setInterval(() => {
-      this.updateTaskCreationTime();
-    }, 5000);
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.updateTimeInterval);
-  }
 
   updateTaskCreationTime = () => {
     this.setState(({ todoData }) => {
@@ -60,15 +67,13 @@ export default class TodoApp extends Component {
   };
 
   onToggleDone = (id) => {
-    this.setState(({ todoData }) => {
-      return {
-        todoData: todoData.map((item) =>
-          item.id === id
-            ? { ...item, status: item.status === "done" ? "active" : "done" }
-            : item,
-        ),
-      };
-    });
+    this.setState(({ todoData }) => ({
+      todoData: todoData.map((item) =>
+        item.id === id
+          ? { ...item, status: item.status === "done" ? "active" : "done" }
+          : item,
+      ),
+    }));
   };
 
   onClearCompleted = () => {
@@ -111,13 +116,14 @@ export default class TodoApp extends Component {
     const { filter, todoData } = this.state;
     if (filter === "all") {
       return todoData;
-    } else if (filter === "active") {
-      return todoData.filter((item) => item.status === "active");
-    } else if (filter === "done") {
-      return todoData.filter((item) => item.status === "done");
-    } else {
-      return todoData;
     }
+    if (filter === "active") {
+      return todoData.filter((item) => item.status === "active");
+    }
+    if (filter === "done") {
+      return todoData.filter((item) => item.status === "done");
+    }
+    return todoData;
   };
 
   render() {
