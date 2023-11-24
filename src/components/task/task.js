@@ -46,7 +46,8 @@ export default class Task extends Component {
   };
 
   handleKeyPress = (event) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && event.target === document.activeElement) {
+      event.preventDefault();
       this.handleSaveClick();
     }
   };
@@ -82,9 +83,9 @@ export default class Task extends Component {
         <label htmlFor="newTaskFormInput">
           <span
             className="description"
-            onClick={onToggleDone}
+            onClick={isEditing ? undefined : onToggleDone}
             onKeyDown={(event) => {
-              if (event.key === "Enter") {
+              if (!isEditing && event.key === "Enter") {
                 onToggleDone();
               }
             }}
