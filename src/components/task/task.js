@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
 
+import Timer from "../timer/timer";
+
 import "./task.css";
 
 export default class Task extends Component {
@@ -11,6 +13,8 @@ export default class Task extends Component {
     this.state = {
       isEditing: false,
       editedDescription: "",
+      isTimerRunning: false,
+      timerStartTime: null,
     };
   }
 
@@ -52,10 +56,27 @@ export default class Task extends Component {
     }
   };
 
+  handleStartTimer = () => {
+    const { isTimerRunning } = this.state;
+
+    if (!isTimerRunning) {
+      this.setState({ isTimerRunning: true, timerStartTime: Date.now() });
+    }
+  };
+
+  handlePauseTimer = () => {
+    const { isTimerRunning } = this.state;
+
+    if (isTimerRunning) {
+      this.setState({ isTimerRunning: false });
+    }
+  };
+
   render() {
     const { description, created, status, onDeleted, onToggleDone } =
       this.props;
-    const { isEditing, editedDescription } = this.state;
+    const { isEditing, editedDescription, isTimerRunning, timerStartTime } =
+      this.state;
 
     const distanceInSeconds = Math.round(
       (new Date() - new Date(created)) / 1000,
@@ -106,6 +127,14 @@ export default class Task extends Component {
               description
             )}
           </span>
+          <div className="timer-container">
+            <Timer
+              onStart={this.handleStartTimer}
+              onPause={this.handlePauseTimer}
+              isRunning={isTimerRunning}
+              startTime={timerStartTime}
+            />
+          </div>
           <span className="created">{formattedDistance}</span>
         </label>
         <button
