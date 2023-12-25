@@ -1,1 +1,1 @@
-https://kata-react-git-timer-dezem4ik.vercel.app/
+https://kata-react.vercel.app/
