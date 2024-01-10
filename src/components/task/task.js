@@ -13,9 +13,19 @@ export default class Task extends Component {
     this.state = {
       isEditing: false,
       editedDescription: "",
-      isTimerRunning: false,
-      timerStartTime: null,
     };
+
+    this.editContainerRef = React.createRef();
+  }
+
+  componentDidMount() {
+    document.addEventListener("keydown", this.handleEscapeKey);
+    window.addEventListener("mousedown", this.handleClickOutside);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.handleEscapeKey);
+    window.removeEventListener("mousedown", this.handleClickOutside);
   }
 
   handleEditClick = () => {
@@ -43,6 +53,26 @@ export default class Task extends Component {
     });
   };
 
+  handleEscapeKey = (event) => {
+    if (event.key === "Escape") {
+      this.handleCancelClick();
+    }
+  };
+
+  handleClickOutside = () => {
+    setTimeout(() => {
+      const { isEditing } = this.state;
+
+      if (
+        this.editContainerRef.current &&
+        !this.editContainerRef.current.contains(document.activeElement) &&
+        isEditing
+      ) {
+        this.handleCancelClick();
+      }
+    }, 0);
+  };
+
   handleDescriptionChange = (event) => {
     this.setState({
       editedDescription: event.target.value,
@@ -56,27 +86,23 @@ export default class Task extends Component {
     }
   };
 
-  handleStartTimer = () => {
-    const { isTimerRunning } = this.state;
-
-    if (!isTimerRunning) {
-      this.setState({ isTimerRunning: true, timerStartTime: Date.now() });
-    }
-  };
-
-  handlePauseTimer = () => {
-    const { isTimerRunning } = this.state;
-
-    if (isTimerRunning) {
-      this.setState({ isTimerRunning: false });
-    }
-  };
-
   render() {
-    const { description, created, status, onDeleted, onToggleDone } =
-      this.props;
-    const { isEditing, editedDescription, isTimerRunning, timerStartTime } =
-      this.state;
+    const {
+      description,
+      created,
+      status,
+      onDeleted,
+      onToggleDone,
+      timerElapsedTime,
+      isTimerRunning,
+      pauseTimer,
+      formatTime,
+      startTimer,
+      minutes,
+      seconds,
+    } = this.props;
+
+    const { isEditing, editedDescription } = this.state;
 
     const distanceInSeconds = Math.round(
       (new Date() - new Date(created)) / 1000,
@@ -112,6 +138,7 @@ export default class Task extends Component {
             }}
             role="button"
             tabIndex={0}
+            ref={this.editContainerRef}
           >
             {isEditing ? (
               <input
@@ -129,10 +156,13 @@ export default class Task extends Component {
           </span>
           <div className="timer-container">
             <Timer
-              onStart={this.handleStartTimer}
-              onPause={this.handlePauseTimer}
+              elapsedTime={timerElapsedTime}
               isRunning={isTimerRunning}
-              startTime={timerStartTime}
+              onPause={pauseTimer}
+              onStart={startTimer}
+              formatTime={formatTime}
+              minutes={minutes}
+              seconds={seconds}
             />
           </div>
           <span className="created">{formattedDistance}</span>

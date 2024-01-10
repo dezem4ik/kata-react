@@ -1,4 +1,5 @@
 .todo-list li .icon-play {
+  margin-left: 17px;
 	font-size: 15px;
 }
 
@@ -22,5 +23,9 @@
 
 .timer-container {
   margin-left: auto;
-  margin-right: 30px;
+  margin-right: 42px;
+}
+
+.time {
+  font-size: 15px;
 }
