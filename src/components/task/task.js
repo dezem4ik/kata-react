@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
 
+import Timer from "../timer/timer";
+
 import "./task.css";
 
 export default class Task extends Component {
@@ -12,6 +14,18 @@ export default class Task extends Component {
       isEditing: false,
       editedDescription: "",
     };
+
+    this.editContainerRef = React.createRef();
+  }
+
+  componentDidMount() {
+    document.addEventListener("keydown", this.handleEscapeKey);
+    window.addEventListener("mousedown", this.handleClickOutside);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.handleEscapeKey);
+    window.removeEventListener("mousedown", this.handleClickOutside);
   }
 
   handleEditClick = () => {
@@ -39,6 +53,26 @@ export default class Task extends Component {
     });
   };
 
+  handleEscapeKey = (event) => {
+    if (event.key === "Escape") {
+      this.handleCancelClick();
+    }
+  };
+
+  handleClickOutside = () => {
+    setTimeout(() => {
+      const { isEditing } = this.state;
+
+      if (
+        this.editContainerRef.current &&
+        !this.editContainerRef.current.contains(document.activeElement) &&
+        isEditing
+      ) {
+        this.handleCancelClick();
+      }
+    }, 0);
+  };
+
   handleDescriptionChange = (event) => {
     this.setState({
       editedDescription: event.target.value,
@@ -53,8 +87,21 @@ export default class Task extends Component {
   };
 
   render() {
-    const { description, created, status, onDeleted, onToggleDone } =
-      this.props;
+    const {
+      description,
+      created,
+      status,
+      onDeleted,
+      onToggleDone,
+      timerElapsedTime,
+      isTimerRunning,
+      pauseTimer,
+      formatTime,
+      startTimer,
+      minutes,
+      seconds,
+    } = this.props;
+
     const { isEditing, editedDescription } = this.state;
 
     const distanceInSeconds = Math.round(
@@ -91,6 +138,7 @@ export default class Task extends Component {
             }}
             role="button"
             tabIndex={0}
+            ref={this.editContainerRef}
           >
             {isEditing ? (
               <input
@@ -106,6 +154,17 @@ export default class Task extends Component {
               description
             )}
           </span>
+          <div className="timer-container">
+            <Timer
+              elapsedTime={timerElapsedTime}
+              isRunning={isTimerRunning}
+              onPause={pauseTimer}
+              onStart={startTimer}
+              formatTime={formatTime}
+              minutes={minutes}
+              seconds={seconds}
+            />
+          </div>
           <span className="created">{formattedDistance}</span>
         </label>
         <button

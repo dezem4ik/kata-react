@@ -19,18 +19,50 @@ export default class TodoApp extends Component {
       filter: "all",
     };
 
-    this.updateTimeInterval = null;
+    this.formatTime = (elapsedTime, minutes, seconds) => {
+      const pad = (num) => (num < 10 ? `0${num}` : num);
+      const hours = Math.floor(elapsedTime / 3600);
+      const min = Math.floor((elapsedTime % 3600) / 60) + minutes;
+      const sec = Math.floor(elapsedTime % 60) + seconds;
+      return `${pad(hours)}:${pad(min)}:${pad(sec)}`;
+    };
   }
 
   componentDidMount() {
     this.updateTimeInterval = setInterval(() => {
       this.updateTaskCreationTime();
-    }, 5000);
+      this.updateTimerElapsedTime();
+      this.decreaseTimers();
+    }, 1000);
   }
 
   componentWillUnmount() {
     clearInterval(this.updateTimeInterval);
   }
+
+  decreaseTimers = () => {
+    this.setState((prevState) => ({
+      todoData: prevState.todoData.map((task) => {
+        if (task.minutes > 0 || task.seconds > 0) {
+          let updatedMinutes = task.minutes;
+          let updatedSeconds = task.seconds - 1;
+
+          if (updatedSeconds < 0) {
+            updatedMinutes -= 1;
+            updatedSeconds = 59;
+          }
+
+          return {
+            ...task,
+            minutes: updatedMinutes,
+            seconds: updatedSeconds,
+          };
+        }
+
+        return task;
+      }),
+    }));
+  };
 
   createTaskItem = (description) => {
     this.maxId += 1;
@@ -42,7 +74,41 @@ export default class TodoApp extends Component {
       description,
       created,
       status: "active",
+      timerElapsedTime: 0,
+      isTimerRunning: false,
+      minutes: 0,
+      seconds: 0,
     };
+  };
+
+  updateTimerElapsedTime = () => {
+    this.setState((prevState) => ({
+      todoData: prevState.todoData.map((task) => {
+        if (task.isTimerRunning) {
+          return { ...task, timerElapsedTime: task.timerElapsedTime + 1 };
+        }
+        return task;
+      }),
+    }));
+  };
+
+  startTimer = (id) => {
+    this.setState((prevState) => ({
+      todoData: prevState.todoData.map((task) => {
+        if (task.id === id) {
+          return { ...task, isTimerRunning: true };
+        }
+        return task;
+      }),
+    }));
+  };
+
+  pauseTimer = (id) => {
+    this.setState((prevState) => ({
+      todoData: prevState.todoData.map((task) =>
+        task.id === id ? { ...task, isTimerRunning: false } : task,
+      ),
+    }));
   };
 
   onSaveTask = (id, editedDescription) => {
@@ -89,17 +155,19 @@ export default class TodoApp extends Component {
     });
   };
 
-  onItemAdded = (label) => {
-    this.setState((state) => {
-      const item = this.createTaskItem(label, new Date());
-
-      return { todoData: [...state.todoData, item] };
+  onItemAdded = (label, minutes, seconds) => {
+    this.setState((prevState) => {
+      const item = this.createTaskItem(label);
+      item.minutes = minutes;
+      item.seconds = seconds;
+      return { todoData: [...prevState.todoData, item] };
     });
   };
 
   deleteItem = (id) => {
     this.setState(({ todoData }) => {
       const idx = todoData.findIndex((el) => el.id === id);
+
       const newArr = [...todoData.slice(0, idx), ...todoData.slice(idx + 1)];
 
       return {
@@ -140,6 +208,9 @@ export default class TodoApp extends Component {
             onDeleted={this.deleteItem}
             onToggleDone={this.onToggleDone}
             onSaveTask={this.onSaveTask}
+            startTimer={this.startTimer}
+            pauseTimer={this.pauseTimer}
+            formatTime={this.formatTime}
           />
           <Footer
             filter={filter}

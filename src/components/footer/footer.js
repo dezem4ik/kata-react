@@ -30,10 +30,7 @@ function Footer({ todoCount, filter, onFilterChange, onClearCompleted }) {
 
   return (
     <footer className="footer">
-      <span className="todo-count">
-        {todoCount}
-        items left
-      </span>
+      <span className="todo-count"> {todoCount} items left </span>
       <ul className="filters">{elements}</ul>
       <button
         type="button"
