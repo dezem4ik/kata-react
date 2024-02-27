@@ -1,10 +1,19 @@
+/* eslint-disable */
 import React from "react";
 import PropTypes from "prop-types";
 
 import "./task-list.css";
 import Task from "../task";
 
-function TaskList({ todos, onDeleted, onToggleDone, onSaveTask }) {
+function TaskList({
+  todos,
+  onDeleted,
+  onToggleDone,
+  onSaveTask,
+  startTimer,
+  pauseTimer,
+  formatTime,
+}) {
   const elements = todos.map((item) => (
     <li key={item.id} className={item.status === "done" ? "completed" : ""}>
       <Task
@@ -15,11 +24,18 @@ function TaskList({ todos, onDeleted, onToggleDone, onSaveTask }) {
         status={item.status}
         onToggleDone={() => onToggleDone(item.id)}
         onSaveTask={onSaveTask}
+        timerElapsedTime={item.timerElapsedTime}
+        isTimerRunning={item.isTimerRunning}
+        startTimer={() => startTimer(item.id)}
+        pauseTimer={() => pauseTimer(item.id)}
+        formatTime={formatTime}
+        minutes={item.minutes}
+        seconds={item.seconds}
       />
     </li>
   ));
 
-  return <ul className="todo-list">{elements}</ul>;
+  return <ul className="todo-list"> {elements} </ul>;
 }
 
 TaskList.defaultProps = {
