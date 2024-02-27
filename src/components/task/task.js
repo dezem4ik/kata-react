@@ -1,196 +1,170 @@
-import React, { Component } from "react";
+/* eslint-disable */
+
+import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
-
 import Timer from "../timer/timer";
-
 import "./task.css";
 
-export default class Task extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isEditing: false,
-      editedDescription: "",
+const Task = ({
+  id,
+  description,
+  created,
+  status,
+  onDeleted,
+  onToggleDone,
+  onSaveTask,
+  timerElapsedTime,
+  isTimerRunning,
+  pauseTimer,
+  formatTime,
+  startTimer,
+  minutes,
+  seconds,
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedDescription, setEditedDescription] = useState(description);
+  const editContainerRef = useRef(null);
+
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key === "Escape") {
+        handleCancelClick();
+      }
     };
 
-    this.editContainerRef = React.createRef();
-  }
+    const handleClickOutside = () => {
+      setTimeout(() => {
+        if (
+          editContainerRef.current &&
+          !editContainerRef.current.contains(document.activeElement) &&
+          isEditing
+        ) {
+          handleCancelClick();
+        }
+      }, 0);
+    };
 
-  componentDidMount() {
-    document.addEventListener("keydown", this.handleEscapeKey);
-    window.addEventListener("mousedown", this.handleClickOutside);
-  }
+    document.addEventListener("keydown", handleEscapeKey);
+    window.addEventListener("mousedown", handleClickOutside);
 
-  componentWillUnmount() {
-    document.removeEventListener("keydown", this.handleEscapeKey);
-    window.removeEventListener("mousedown", this.handleClickOutside);
-  }
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+      window.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isEditing]);
 
-  handleEditClick = () => {
-    const { description } = this.props;
-    this.setState({
-      isEditing: true,
-      editedDescription: description,
-    });
+  const handleEditClick = () => {
+    setIsEditing(true);
+    setEditedDescription(description);
   };
 
-  handleSaveClick = () => {
-    const { id, onSaveTask } = this.props;
-    const { editedDescription } = this.state;
+  const handleSaveClick = () => {
     onSaveTask(id, editedDescription);
-    this.setState({
-      isEditing: false,
-      editedDescription: "",
-    });
+    setIsEditing(false);
+    setEditedDescription("");
   };
 
-  handleCancelClick = () => {
-    this.setState({
-      isEditing: false,
-      editedDescription: "",
-    });
+  const handleCancelClick = () => {
+    setIsEditing(false);
+    setEditedDescription("");
   };
 
-  handleEscapeKey = (event) => {
-    if (event.key === "Escape") {
-      this.handleCancelClick();
-    }
+  const handleDescriptionChange = (event) => {
+    setEditedDescription(event.target.value);
   };
 
-  handleClickOutside = () => {
-    setTimeout(() => {
-      const { isEditing } = this.state;
-
-      if (
-        this.editContainerRef.current &&
-        !this.editContainerRef.current.contains(document.activeElement) &&
-        isEditing
-      ) {
-        this.handleCancelClick();
-      }
-    }, 0);
-  };
-
-  handleDescriptionChange = (event) => {
-    this.setState({
-      editedDescription: event.target.value,
-    });
-  };
-
-  handleKeyPress = (event) => {
+  const handleKeyPress = (event) => {
     if (event.key === "Enter" && event.target === document.activeElement) {
       event.preventDefault();
-      this.handleSaveClick();
+      handleSaveClick();
     }
   };
 
-  render() {
-    const {
-      description,
-      created,
-      status,
-      onDeleted,
-      onToggleDone,
-      timerElapsedTime,
-      isTimerRunning,
-      pauseTimer,
-      formatTime,
-      startTimer,
-      minutes,
-      seconds,
-    } = this.props;
+  const distanceInSeconds = Math.round((new Date() - new Date(created)) / 1000);
+  let formattedDistance;
+  if (distanceInSeconds < 60) {
+    formattedDistance = `created ${distanceInSeconds} seconds ago`;
+  } else {
+    formattedDistance = `created ${formatDistanceToNow(created, {
+      addSuffix: true,
+      includeSeconds: false,
+      locale: enUS,
+    })}`;
+  }
 
-    const { isEditing, editedDescription } = this.state;
-
-    const distanceInSeconds = Math.round(
-      (new Date() - new Date(created)) / 1000,
-    );
-
-    let formattedDistance;
-    if (distanceInSeconds < 60) {
-      formattedDistance = `created ${distanceInSeconds} seconds ago`;
-    } else {
-      formattedDistance = `created ${formatDistanceToNow(created, {
-        addSuffix: true,
-        includeSeconds: false,
-        locale: enUS,
-      })}`;
-    }
-
-    return (
-      <div className={`view ${isEditing ? "editing" : ""}`}>
-        <input
-          checked={status === "done"}
-          className="toggle"
-          type="checkbox"
-          onChange={onToggleDone}
-        />
-        <label htmlFor="newTaskFormInput">
-          <span
-            className="description"
-            onClick={isEditing ? undefined : onToggleDone}
-            onKeyDown={(event) => {
-              if (!isEditing && event.key === "Enter") {
-                onToggleDone();
-              }
-            }}
-            role="button"
-            tabIndex={0}
-            ref={this.editContainerRef}
-          >
-            {isEditing ? (
-              <input
-                type="text"
-                value={editedDescription}
-                onChange={this.handleDescriptionChange}
-                onKeyPress={this.handleKeyPress}
-                autoFocus
-                id="newTaskFormInput"
-                aria-label="Edit task description"
-              />
-            ) : (
-              description
-            )}
-          </span>
-          <div className="timer-container">
-            <Timer
-              elapsedTime={timerElapsedTime}
-              isRunning={isTimerRunning}
-              onPause={pauseTimer}
-              onStart={startTimer}
-              formatTime={formatTime}
-              minutes={minutes}
-              seconds={seconds}
+  return (
+    <div className={`view ${isEditing ? "editing" : ""}`}>
+      <input
+        checked={status === "done"}
+        className="toggle"
+        type="checkbox"
+        onChange={onToggleDone}
+      />
+      <label htmlFor="newTaskFormInput">
+        <span
+          className="description"
+          onClick={isEditing ? undefined : onToggleDone}
+          onKeyDown={(event) => {
+            if (!isEditing && event.key === "Enter") {
+              onToggleDone();
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          ref={editContainerRef}
+        >
+          {isEditing ? (
+            <input
+              type="text"
+              value={editedDescription}
+              onChange={handleDescriptionChange}
+              onKeyPress={handleKeyPress}
+              autoFocus
+              id="newTaskFormInput"
+              aria-label="Edit task description"
             />
-          </div>
-          <span className="created">{formattedDistance}</span>
-        </label>
-        <button
-          type="button"
-          className={`icon icon-edit ${isEditing ? "editing" : ""}`}
-          onClick={isEditing ? this.handleSaveClick : this.handleEditClick}
-          aria-label={isEditing ? "Save task" : "Edit task"}
-        />
-        {isEditing && (
-          <button
-            type="button"
-            className="icon icon-destroy"
-            onClick={this.handleCancelClick}
-            aria-label="Cancel edit"
+          ) : (
+            description
+          )}
+        </span>
+        <div className="timer-container">
+          <Timer
+            elapsedTime={timerElapsedTime}
+            isRunning={isTimerRunning}
+            onPause={pauseTimer}
+            onStart={startTimer}
+            formatTime={formatTime}
+            minutes={minutes}
+            seconds={seconds}
           />
-        )}
+        </div>
+        <span className="created">{formattedDistance}</span>
+      </label>
+      <button
+        type="button"
+        className={`icon icon-edit ${isEditing ? "editing" : ""}`}
+        onClick={isEditing ? handleSaveClick : handleEditClick}
+        aria-label={isEditing ? "Save task" : "Edit task"}
+      />
+      {isEditing && (
         <button
           type="button"
           className="icon icon-destroy"
-          onClick={onDeleted}
-          aria-label="Delete task"
+          onClick={handleCancelClick}
+          aria-label="Cancel edit"
         />
-      </div>
-    );
-  }
-}
+      )}
+      <button
+        type="button"
+        className="icon icon-destroy"
+        onClick={onDeleted}
+        aria-label="Delete task"
+      />
+    </div>
+  );
+};
 
 Task.propTypes = {
   id: PropTypes.number.isRequired,
@@ -201,3 +175,6 @@ Task.propTypes = {
   onToggleDone: PropTypes.func.isRequired,
   onSaveTask: PropTypes.func.isRequired,
 };
+
+export default Task;
+
