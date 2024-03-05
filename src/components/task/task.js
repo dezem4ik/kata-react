@@ -1,13 +1,12 @@
-/* eslint-disable */
-
 import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
+
 import Timer from "../timer/timer";
 import "./task.css";
 
-const Task = ({
+function Task({
   id,
   description,
   created,
@@ -22,10 +21,37 @@ const Task = ({
   startTimer,
   minutes,
   seconds,
-}) => {
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedDescription, setEditedDescription] = useState(description);
   const editContainerRef = useRef(null);
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+    setEditedDescription(description);
+  };
+
+  const handleSaveClick = () => {
+    onSaveTask(id, editedDescription);
+    setIsEditing(false);
+    setEditedDescription("");
+  };
+
+  const handleCancelClick = () => {
+    setIsEditing(false);
+    setEditedDescription("");
+  };
+
+  const handleDescriptionChange = (event) => {
+    setEditedDescription(event.target.value);
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter" && event.target === document.activeElement) {
+      event.preventDefault();
+      handleSaveClick();
+    }
+  };
 
   useEffect(() => {
     const handleEscapeKey = (event) => {
@@ -54,33 +80,6 @@ const Task = ({
       window.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isEditing]);
-
-  const handleEditClick = () => {
-    setIsEditing(true);
-    setEditedDescription(description);
-  };
-
-  const handleSaveClick = () => {
-    onSaveTask(id, editedDescription);
-    setIsEditing(false);
-    setEditedDescription("");
-  };
-
-  const handleCancelClick = () => {
-    setIsEditing(false);
-    setEditedDescription("");
-  };
-
-  const handleDescriptionChange = (event) => {
-    setEditedDescription(event.target.value);
-  };
-
-  const handleKeyPress = (event) => {
-    if (event.key === "Enter" && event.target === document.activeElement) {
-      event.preventDefault();
-      handleSaveClick();
-    }
-  };
 
   const distanceInSeconds = Math.round((new Date() - new Date(created)) / 1000);
   let formattedDistance;
@@ -164,7 +163,7 @@ const Task = ({
       />
     </div>
   );
-};
+}
 
 Task.propTypes = {
   id: PropTypes.number.isRequired,
@@ -177,4 +176,3 @@ Task.propTypes = {
 };
 
 export default Task;
-

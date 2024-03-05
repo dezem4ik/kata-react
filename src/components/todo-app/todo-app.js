@@ -1,9 +1,8 @@
-/* eslint-disable */
 import React, { useState, useEffect } from "react";
+
 import Footer from "../footer";
 import TaskList from "../task-list";
 import Header from "../header";
-
 
 const createTaskItem = (description, id) => {
   const created = new Date();
@@ -20,10 +19,53 @@ const createTaskItem = (description, id) => {
   };
 };
 
-const TodoApp = () => {
+function TodoApp() {
   const [todoData, setTodoData] = useState([]);
   const [filter, setFilter] = useState("all");
   const [maxId, setMaxId] = useState(100);
+
+  const updateTaskCreationTime = () => {
+    setTodoData((prevTodoData) =>
+      prevTodoData.map((item) => ({
+        ...item,
+        created: new Date(item.created),
+      })),
+    );
+  };
+
+  const updateTimerElapsedTime = () => {
+    setTodoData((prevTodoData) =>
+      prevTodoData.map((task) =>
+        task.isTimerRunning
+          ? { ...task, timerElapsedTime: task.timerElapsedTime + 1 }
+          : task,
+      ),
+    );
+  };
+
+  const decreaseTimers = () => {
+    setTodoData((prevTodoData) =>
+      prevTodoData.map((task) => {
+        if (task.minutes > 0 || task.seconds > 0) {
+          let updatedMinutes = task.minutes;
+          let updatedSeconds = task.seconds - 1;
+
+          if (updatedSeconds < 0) {
+            updatedMinutes -= 1;
+            updatedSeconds = 59;
+          }
+
+          return {
+            ...task,
+            minutes: updatedMinutes,
+            seconds: updatedSeconds,
+          };
+        }
+
+        return task;
+      }),
+    );
+  };
 
   useEffect(() => {
     setTodoData([
@@ -32,6 +74,7 @@ const TodoApp = () => {
       createTaskItem("Active task", maxId + 3),
     ]);
     setMaxId(maxId + 3);
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
@@ -57,68 +100,27 @@ const TodoApp = () => {
     return maxId + 1;
   };
 
-  const decreaseTimers = () => {
-    setTodoData((prevTodoData) =>
-      prevTodoData.map((task) => {
-        if (task.minutes > 0 || task.seconds > 0) {
-          let updatedMinutes = task.minutes;
-          let updatedSeconds = task.seconds - 1;
-
-          if (updatedSeconds < 0) {
-            updatedMinutes -= 1;
-            updatedSeconds = 59;
-          }
-
-          return {
-            ...task,
-            minutes: updatedMinutes,
-            seconds: updatedSeconds,
-          };
-        }
-
-        return task;
-      })
-    );
-  };
-
-  const updateTimerElapsedTime = () => {
-    setTodoData((prevTodoData) =>
-      prevTodoData.map((task) =>
-        task.isTimerRunning ? { ...task, timerElapsedTime: task.timerElapsedTime + 1 } : task
-      )
-    );
-  };
-
   const startTimer = (id) => {
     setTodoData((prevTodoData) =>
       prevTodoData.map((task) =>
-        task.id === id ? { ...task, isTimerRunning: true } : task
-      )
+        task.id === id ? { ...task, isTimerRunning: true } : task,
+      ),
     );
   };
 
   const pauseTimer = (id) => {
     setTodoData((prevTodoData) =>
       prevTodoData.map((task) =>
-        task.id === id ? { ...task, isTimerRunning: false } : task
-      )
+        task.id === id ? { ...task, isTimerRunning: false } : task,
+      ),
     );
   };
 
   const onSaveTask = (id, editedDescription) => {
     setTodoData((prevTodoData) =>
       prevTodoData.map((item) =>
-        item.id === id ? { ...item, description: editedDescription } : item
-      )
-    );
-  };
-
-  const updateTaskCreationTime = () => {
-    setTodoData((prevTodoData) =>
-      prevTodoData.map((item) => ({
-        ...item,
-        created: new Date(item.created),
-      }))
+        item.id === id ? { ...item, description: editedDescription } : item,
+      ),
     );
   };
 
@@ -127,13 +129,15 @@ const TodoApp = () => {
       prevTodoData.map((item) =>
         item.id === id
           ? { ...item, status: item.status === "done" ? "active" : "done" }
-          : item
-      )
+          : item,
+      ),
     );
   };
 
   const onClearCompleted = () => {
-    setTodoData((prevTodoData) => prevTodoData.filter((item) => item.status === "active"));
+    setTodoData((prevTodoData) =>
+      prevTodoData.filter((item) => item.status === "active"),
+    );
     setFilter("all");
   };
 
@@ -149,8 +153,8 @@ const TodoApp = () => {
     setTodoData((prevTodoData) => prevTodoData.filter((el) => el.id !== id));
   };
 
-  const onFilterChange = (filter) => {
-    setFilter(filter);
+  const onFilterChange = (filt) => {
+    setFilter(filt);
   };
 
   const filterItems = () => {
@@ -191,8 +195,6 @@ const TodoApp = () => {
       </section>
     </section>
   );
-};
+}
 
 export default TodoApp;
-
-

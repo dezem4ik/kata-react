@@ -1,10 +1,9 @@
-/* eslint-disable */
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 
 import "./new-task-form.css";
 
-const NewTaskForm = ({ onAdded }) => {
+function NewTaskForm({ onAdded }) {
   const [label, setLabel] = useState("");
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
@@ -12,7 +11,11 @@ const NewTaskForm = ({ onAdded }) => {
   const onSubmit = (e) => {
     e.preventDefault();
 
-    if (label.trim() !== "" && !Number.isNaN(minutes) && !Number.isNaN(seconds)) {
+    if (
+      label.trim() !== "" &&
+      !Number.isNaN(minutes) &&
+      !Number.isNaN(seconds)
+    ) {
       const cb = onAdded || (() => {});
       cb(label, parseInt(minutes, 10), parseInt(seconds, 10));
       setLabel("");
@@ -42,24 +45,27 @@ const NewTaskForm = ({ onAdded }) => {
       <input
         className="new-todo-form__timer"
         placeholder="Min"
-        onChange={(e) => setMinutes(e.target.value !== "" ? parseInt(e.target.value, 10) : 0)}
+        onChange={(e) =>
+          setMinutes(e.target.value !== "" ? parseInt(e.target.value, 10) : 0)
+        }
         value={minutes > 0 ? minutes : ""}
         onKeyPress={handleKeyPress}
       />
       <input
         className="new-todo-form__timer"
         placeholder="Sec"
-        onChange={(e) => setSeconds(e.target.value !== "" ? parseInt(e.target.value, 10) : 0)}
+        onChange={(e) =>
+          setSeconds(e.target.value !== "" ? parseInt(e.target.value, 10) : 0)
+        }
         value={seconds > 0 ? seconds : ""}
         onKeyPress={handleKeyPress}
       />
     </form>
   );
-};
+}
 
 NewTaskForm.propTypes = {
   onAdded: PropTypes.func.isRequired,
 };
 
 export default NewTaskForm;
-
